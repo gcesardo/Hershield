@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Quem tem acesso ao meu celular?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..900&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#120d1d;--ink-2:#1c1430;--panel:#241a3a;
+    --line:rgba(196,168,255,.16);
+    --lilas:#a678f2;--lilas-soft:#c9aef7;--lilas-faint:#8d76b8;
+    --alert:#ffb454;--ok:#6fdba8;--red:#ef5a5a;
+    --tx:#e9e2f7;--tx-muted:#c6bade;
+    --radius:14px;
+    --disp:'Archivo',sans-serif;--body:'Instrument Sans',sans-serif;--mono:'JetBrains Mono',monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+  body{font-family:var(--body);color:var(--tx);line-height:1.6;font-size:17px;padding-bottom:64px;
+    background:radial-gradient(900px 480px at 80% -10%,rgba(166,120,242,.12),transparent 60%),radial-gradient(700px 460px at -10% 4%,rgba(166,120,242,.07),transparent 60%),var(--ink);
+    background-attachment:fixed;-webkit-font-smoothing:antialiased}
+  ::selection{background:var(--lilas);color:var(--ink)}
+  .wrap{max-width:640px;margin:0 auto;padding:0 20px}
+
+  .exit-bar{position:sticky;top:0;z-index:50;background:rgba(18,13,29,.82);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);padding:10px 0}
+  .exit-bar .wrap{display:flex;align-items:center;gap:10px}
+  .logo{display:flex;align-items:center;gap:8px;text-decoration:none}
+  .logo svg{width:22px;height:22px;flex:none}
+  .logo b{font-family:var(--disp);font-weight:800;letter-spacing:.14em;font-size:14px;color:#fff}
+  .logo b span{color:var(--lilas)}
+  .exit-note{font-family:var(--mono);font-size:11.5px;color:var(--lilas-faint);margin-right:auto}
+  .exit-btn{font-family:var(--disp);font-size:14px;font-weight:700;background:var(--red);color:#fff;border:none;padding:9px 16px;border-radius:10px;cursor:pointer;display:inline-flex;align-items:center;gap:7px}
+  .exit-btn:hover{background:#d8434e}
+  .exit-btn:focus-visible{outline:2px solid #ffb3b8;outline-offset:3px}
+
+  .screen{display:none}
+  .screen.active{display:block;animation:rise .28s ease}
+  @keyframes rise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+  .hero{padding:44px 0 8px}
+  .kicker{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--lilas-soft);border:1px solid var(--line);border-radius:99px;padding:7px 14px;margin-bottom:22px;background:rgba(166,120,242,.06)}
+  .kicker::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--lilas);animation:pulseDot 2.4s infinite}
+  @keyframes pulseDot{0%,100%{box-shadow:0 0 0 0 rgba(166,120,242,.5)}50%{box-shadow:0 0 0 7px rgba(166,120,242,0)}}
+  h1{font-family:var(--disp);font-variation-settings:'wdth' 112;font-weight:800;font-size:clamp(32px,5.2vw,44px);line-height:1.06;letter-spacing:-.015em;color:#fff;margin-bottom:16px}
+  .lead{font-size:18px;color:var(--tx-muted);max-width:52ch}
+
+  .safety{background:linear-gradient(160deg,var(--ink-2),var(--panel));border:1px solid var(--line);border-left:5px solid var(--lilas);border-radius:var(--radius);padding:20px 22px;margin:28px 0;box-shadow:0 20px 50px rgba(0,0,0,.35)}
+  .safety h2{font-family:var(--disp);font-weight:700;font-size:20px;color:#fff;margin-bottom:12px}
+  .safety ul{list-style:none;display:grid;gap:11px}
+  .safety li{position:relative;padding-left:28px;font-size:15.5px;color:var(--tx)}
+  .safety li::before{content:"";position:absolute;left:0;top:7px;width:16px;height:16px;background:rgba(166,120,242,.15);border:2px solid var(--lilas);border-radius:5px}
+
+  .choose h2{font-family:var(--disp);font-weight:700;font-size:24px;color:#fff;margin:8px 0 18px}
+  .devices{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .device{font-family:inherit;text-align:left;cursor:pointer;background:linear-gradient(160deg,var(--ink-2),var(--panel));border:1px solid var(--line);border-radius:16px;padding:22px 20px;transition:border-color .15s,transform .15s,box-shadow .15s}
+  .device:hover{border-color:var(--lilas);transform:translateY(-2px);box-shadow:0 12px 30px rgba(166,120,242,.22)}
+  .device:focus-visible{outline:2px solid var(--lilas);outline-offset:3px}
+  .device .ic{font-size:30px;line-height:1;margin-bottom:12px;display:block}
+  .device .dn{display:block;font-family:var(--disp);font-weight:700;font-size:19px;color:#fff}
+  .device .ds{display:block;font-size:14px;color:var(--lilas-faint);margin-top:3px}
+
+  .prog-head{padding:24px 0 6px}
+  .prog-meta{display:flex;justify-content:space-between;align-items:baseline;font-family:var(--mono);font-size:13px;color:var(--lilas-faint);margin-bottom:8px}
+  .prog-step{font-weight:700;color:var(--lilas-soft)}
+  .bar{height:7px;background:rgba(255,255,255,.08);border-radius:999px;overflow:hidden}
+  .bar>i{display:block;height:100%;background:var(--lilas);border-radius:999px;transition:width .35s ease}
+
+  .card{background:linear-gradient(160deg,var(--ink-2),var(--panel));border:1px solid var(--line);border-radius:16px;padding:26px 24px;margin:18px 0;box-shadow:0 24px 60px rgba(0,0,0,.4)}
+  .tag{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:12px;font-weight:500;padding:5px 11px;border-radius:999px;margin-bottom:14px;letter-spacing:.03em}
+  .tag.safe{background:rgba(111,219,168,.13);color:var(--ok)}
+  .card h3{font-family:var(--disp);font-weight:700;font-size:24px;line-height:1.2;color:#fff;margin-bottom:16px}
+  .field{margin-top:18px}
+  .field .lbl{font-family:var(--mono);font-size:11.5px;font-weight:500;text-transform:uppercase;letter-spacing:.08em;color:var(--lilas-soft);margin-bottom:6px}
+  .field p{font-size:16px;color:#dcd4f2}
+
+  .crumbs{display:flex;flex-wrap:wrap;gap:6px 4px;align-items:center;margin:6px 0 2px}
+  .crumb{background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:8px;padding:5px 10px;font-size:13.5px;color:#cabfe6}
+  .crumb.dest{background:rgba(166,120,242,.16);border-color:var(--lilas);color:#fff;font-weight:600}
+  .csep{color:var(--lilas-faint);font-size:14px}
+
+  .phone-wrap{display:flex;justify-content:center;margin:18px 0 6px}
+  .phone{width:270px;max-width:82vw;background:#0c0916;border-radius:40px;padding:10px;box-shadow:0 18px 48px rgba(0,0,0,.6),0 0 0 1px rgba(166,120,242,.12)}
+  .scrn{border-radius:30px;overflow:hidden;position:relative;background:#EFEFF3}
+  .scrn.ios{background:#EFEFF3}
+  .scrn.android{background:#fff}
+  .statusbar{display:flex;justify-content:space-between;align-items:center;padding:9px 18px 5px;font-family:var(--mono);font-size:12px;font-weight:600;color:#241a3a}
+  .sb-r{display:flex;align-items:center;gap:5px}
+  .sb-dot{width:15px;height:9px;border-radius:2px;background:#241a3a;opacity:.7;display:inline-block}
+  .sb-bat{width:20px;height:10px;border:1.5px solid #241a3a;border-radius:3px;position:relative;opacity:.7}
+  .sb-bat::after{content:"";position:absolute;left:1.5px;top:1.5px;bottom:1.5px;width:70%;background:#241a3a;border-radius:1px}
+  .nav{display:flex;align-items:center;gap:8px;padding:6px 14px 12px}
+  .nav-back{color:var(--lilas);font-size:20px;line-height:1;font-weight:700}
+  .nav-title{font-family:var(--disp);font-weight:700;font-size:16px;color:#241a3a}
+  .android .nav-title{font-size:19px}
+
+  .list{padding:0 12px 16px}
+  .group{background:#fff;border-radius:14px;box-shadow:0 1px 0 rgba(0,0,0,.04)}
+  .android .group{background:transparent;box-shadow:none;border-radius:0}
+  .row{display:flex;align-items:center;gap:11px;padding:11px 12px;position:relative;border-bottom:1px solid #ECECEF}
+  .android .row{padding:14px 8px;border-bottom:1px solid #F0F0F0}
+  .row:last-child{border-bottom:none}
+  .r-ic{width:29px;height:29px;border-radius:8px;flex:none;display:flex;align-items:center;justify-content:center;font-size:15px;color:#fff}
+  .android .r-ic{border-radius:50%}
+  .r-tx{flex:1;min-width:0}
+  .r-lb{font-size:14.5px;color:#241a3a;line-height:1.25}
+  .r-sub{font-size:12px;color:#8A8598;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .r-val{font-size:13px;color:#8A8598;flex:none;max-width:38%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .chev{color:#C2C0CC;font-size:16px;flex:none;font-weight:700}
+  .android .chev{display:none}
+  .sw{width:34px;height:20px;border-radius:999px;background:var(--lilas);flex:none;position:relative}
+  .sw::after{content:"";position:absolute;top:2px;right:2px;width:16px;height:16px;border-radius:50%;background:#fff}
+
+  .row.target{border-radius:11px;z-index:2;background:rgba(166,120,242,.16);animation:tap 1.6s ease-in-out infinite}
+  .row.target .r-lb{font-weight:700;color:#3a2a5e}
+  @keyframes tap{0%,100%{transform:scale(1);box-shadow:inset 0 0 0 2px var(--lilas),0 0 0 0 rgba(166,120,242,.35)}50%{transform:scale(1.035);box-shadow:inset 0 0 0 2px var(--lilas),0 0 0 5px rgba(166,120,242,.16)}}
+  .taphere{position:absolute;top:-11px;right:10px;background:var(--lilas);color:#1a1230;font-family:var(--disp);font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;white-space:nowrap;box-shadow:0 2px 8px rgba(166,120,242,.5)}
+  .taphere::after{content:"";position:absolute;bottom:-4px;right:14px;width:8px;height:8px;background:var(--lilas);transform:rotate(45deg)}
+
+  .mock-cap{text-align:center;font-size:13px;color:var(--lilas-faint);margin-top:2px}
+  .mock-cap b{color:var(--tx);font-weight:600}
+  .mock-note{text-align:center;font-family:var(--mono);font-size:11px;color:var(--lilas-faint);margin-top:8px}
+
+  .flag{margin-top:18px;background:rgba(239,90,90,.10);border:1px solid rgba(239,90,90,.30);border-radius:10px;padding:13px 15px;font-size:15px;color:var(--tx)}
+  .flag .lbl{color:#ff8a8a;font-weight:700;margin-bottom:4px}
+  .caution{margin-top:18px;background:rgba(255,180,84,.10);border:1px solid rgba(255,180,84,.30);border-radius:10px;padding:13px 15px;font-size:15px;color:var(--tx)}
+  .caution .lbl{color:var(--alert);font-weight:700;margin-bottom:4px}
+
+  .report{margin-top:24px;border-top:1px solid var(--line);padding-top:20px}
+  .report p{font-weight:600;color:#fff;margin-bottom:12px}
+  .opts{display:flex;gap:10px;flex-wrap:wrap}
+  .opt{font-family:var(--body);font-size:15px;font-weight:500;cursor:pointer;background:rgba(255,255,255,.03);border:1.5px solid var(--line);color:var(--tx);padding:10px 18px;border-radius:999px;transition:.15s}
+  .opt:hover{border-color:var(--lilas)}
+  .opt.sel{background:var(--lilas);border-color:var(--lilas);color:var(--ink)}
+  .opt:focus-visible{outline:2px solid var(--lilas);outline-offset:3px}
+
+  .navbtns{display:flex;gap:12px;margin-top:22px;align-items:center}
+  .btn{font-family:var(--disp);font-size:16px;font-weight:700;cursor:pointer;border-radius:10px;padding:13px 24px;border:none;transition:transform .15s,box-shadow .15s,border-color .15s}
+  .btn-next{background:var(--lilas);color:var(--ink);flex:1;box-shadow:0 8px 28px rgba(166,120,242,.35)}
+  .btn-next:hover{transform:translateY(-2px)}
+  .btn-back{background:rgba(255,255,255,.03);color:#cabfe6;border:1.5px solid var(--line)}
+  .btn-back:hover{border-color:var(--lilas)}
+  .btn:focus-visible{outline:2px solid var(--lilas);outline-offset:3px}
+
+  .sum-hd{padding:36px 0 4px}
+  .sum-list{display:grid;gap:12px;margin:18px 0}
+  .sum-item{background:linear-gradient(160deg,var(--ink-2),var(--panel));border:1px solid var(--line);border-left:4px solid var(--alert);border-radius:12px;padding:14px 16px;font-size:15.5px;color:var(--tx)}
+  .sum-item.none{border-left-color:var(--ok)}
+  .sum-item b{color:#fff}
+  .resources{background:linear-gradient(160deg,#2c2050,#1d1533);border:1px solid rgba(166,120,242,.35);border-radius:16px;padding:24px;margin:24px 0}
+  .resources h3{font-family:var(--disp);font-weight:700;font-size:21px;color:#fff;margin-bottom:12px}
+  .resources p{font-size:15px;margin-bottom:9px;color:#cabfe6}
+  .resources .num{color:var(--lilas);font-weight:700}
+  .restart{background:transparent;border:1.5px solid var(--line);color:var(--lilas-faint);font-family:var(--disp);font-size:15px;font-weight:700;padding:11px 20px;border-radius:10px;cursor:pointer}
+  .restart:hover{border-color:var(--lilas)}
+
+  footer{color:var(--lilas-faint);font-size:13px;text-align:center;padding:36px 0 8px;line-height:1.6}
+
+  @media (max-width:480px){h1{font-size:28px}.devices{grid-template-columns:1fr}body{font-size:16px}}
+  @media (prefers-reduced-motion:reduce){*{animation:none !important;transition:none !important}}
+</style>
+</head>
+<body>
+
+<div class="exit-bar">
+  <div class="wrap">
+    <a class="logo" href="#intro" aria-label="HERSHIELD"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2l8 3v6c0 5-3.5 8.6-8 11-4.5-2.4-8-6-8-11V5l8-3z" fill="rgba(166,120,242,.18)" stroke="#a678f2" stroke-width="1.6" stroke-linejoin="round"/></svg><b>HER<span>SHIELD</span></b></a>
+    <span class="exit-note">Nada é salvo</span>
+    <button class="exit-btn" onclick="quickExit()" aria-label="Sair rápido desta página">✕ Sair rápido</button>
+  </div>
+</div>
+
+<main class="wrap">
+
+  <!-- INTRO -->
+  <section id="intro" class="screen active">
+    <div class="hero">
+      <div class="kicker">Um passo de cada vez</div>
+      <h1>Quem tem acesso ao seu celular?</h1>
+      <p class="lead">Muitas vezes não é preciso nenhum aplicativo espião: basta alguém ter uma conta, uma localização ou um dispositivo ligado ao seu. Vamos conferir juntos, com calma.</p>
+    </div>
+    <div class="safety">
+      <h2>Antes de começar</h2>
+      <ul>
+        <li>Se acha que estão te vigiando, faça isto em um aparelho seguro (de alguém de confiança ou de um lugar público), não no que pode estar sendo monitorado.</li>
+        <li>Aqui você só vai <b>olhar</b>. Não vamos apagar nem mudar nada — mudar cedo demais pode avisar quem te monitora.</li>
+        <li>Este guia não salva nada e não sabe quem você é.</li>
+        <li>O botão <b>“Sair rápido”</b>, no topo, fecha esta página na hora.</li>
+      </ul>
+    </div>
+    <div class="choose">
+      <h2>Qual é o seu aparelho?</h2>
+      <div class="devices">
+        <button class="device" onclick="start('ios')"><span class="ic" aria-hidden="true">📱</span><span class="dn">iPhone</span><span class="ds">Apple / iOS</span></button>
+        <button class="device" onclick="start('android')"><span class="ic" aria-hidden="true">🤖</span><span class="dn">Android</span><span class="ds">Samsung, Motorola, Xiaomi…</span></button>
+      </div>
+    </div>
+    <footer>Guia de autoverificação. Não substitui ajuda profissional.<br>Em perigo agora? Ligue 190. Central de Atendimento à Mulher: 180.<br><br>Uma iniciativa social <b style="color:var(--lilas-soft)">HERSHIELD Aberto</b> · hershield.com.br</footer>
+  </section>
+
+  <!-- STEPS -->
+  <section id="steps" class="screen">
+    <div class="prog-head">
+      <div class="prog-meta"><span class="prog-step" id="progLabel">Passo 1</span><span id="progTotal"></span></div>
+      <div class="bar"><i id="progFill" style="width:0%"></i></div>
+    </div>
+    <div class="card" id="stepCard"></div>
+    <div class="navbtns">
+      <button class="btn btn-back" id="backBtn" onclick="prev()">Voltar</button>
+      <button class="btn btn-next" id="nextBtn" onclick="next()">Próximo</button>
+    </div>
+    <footer>As telas aqui são exemplos ilustrativos. No seu aparelho os nomes podem estar um pouco diferentes — procure a palavra parecida.</footer>
+  </section>
+
+  <!-- SUMMARY -->
+  <section id="summary" class="screen">
+    <div class="sum-hd"><div class="kicker">Você chegou ao fim</div><h1>O que fazer agora</h1></div>
+    <div id="sumList" class="sum-list"></div>
+    <div class="safety" style="border-left-color:var(--amber)">
+      <h2>O passo mais importante</h2>
+      <ul>
+        <li><b>Não mude nada sozinha por impulso.</b> Trocar senha ou remover acesso pode alertar quem te monitora e aumentar o risco.</li>
+        <li>Anote e guarde provas (fotos das telas) em local seguro, fora deste aparelho.</li>
+        <li>Converse com alguém que entende de segurança em relações abusivas antes de “consertar” as contas — a ordem certa importa.</li>
+      </ul>
+    </div>
+    <div class="resources">
+      <h3>Onde buscar ajuda</h3>
+      <p><span class="num">190</span> — Polícia, em caso de perigo imediato.</p>
+      <p><span class="num">180</span> — Central de Atendimento à Mulher (orientação e denúncia, gratuito e sigiloso).</p>
+      <p>Delegacia da Mulher ou um serviço de apoio a vítimas pode ajudar no plano de segurança digital.</p>
+    </div>
+    <button class="restart" onclick="location.reload()">Começar de novo</button>
+    <footer>Nada do que você respondeu foi salvo.</footer>
+  </section>
+
+</main>
+
+<script>
+  function quickExit(){ window.location.replace("https://www.google.com/search?q=previs%C3%A3o+do+tempo"); }
+
+  // paleta de tiles de ícone
+  const C={blue:"#3E7BC4",green:"#4F9E6A",grey:"#8A9591",red:"#C4544E",teal:"#2F8079",orange:"#C98A3A",purple:"#7A6CB0",dark:"#3C4B48"};
+
+  const CONTENT = {
+    ios: [
+      { title:"De quem é a conta deste iPhone?",
+        what:"O iPhone é ligado a uma Conta Apple. Se o e-mail não for seu, outra pessoa pode ver suas fotos, mensagens e localização.",
+        path:"Ajustes → toque no seu nome (no topo)",
+        flag:"Um e-mail que não é seu, ou que quem te controla criou/conhece.",
+        mock:{crumbs:["Ajustes"],header:"Ajustes",rows:[
+          {ic:"👤",bg:C.grey,label:"Ana Souza",sub:"Conta Apple, iCloud e mais",target:true,taphint:"É a sua conta?",chev:1},
+          {ic:"✈️",bg:C.orange,label:"Modo Avião",chev:1},
+          {ic:"📶",bg:C.blue,label:"Wi-Fi",val:"Casa",chev:1},
+          {ic:"🔵",bg:C.blue,label:"Bluetooth",val:"Ativado",chev:1}
+        ]}},
+      { title:"Quais aparelhos estão ligados à sua conta?",
+        what:"A mesma Conta Apple pode estar aberta em outros aparelhos — e eles recebem suas mensagens e fotos.",
+        path:"Ajustes → seu nome → role até a lista de aparelhos, no fim",
+        flag:"Um iPhone, iPad ou Mac que você não tem ou não reconhece.",
+        mock:{crumbs:["Ajustes","Conta Apple"],header:"Conta Apple",rows:[
+          {ic:"📱",bg:C.grey,label:"iPhone de Ana",sub:"Este iPhone",chev:1},
+          {ic:"💻",bg:C.grey,label:"MacBook desconhecido",sub:"Conectado há 3 dias",target:true,taphint:"É seu?",chev:1}
+        ]}},
+      { title:"Como sua conta é recuperada?",
+        what:"Quem controla o telefone ou e-mail de recuperação entra na conta mesmo sem a senha. É a porta dos fundos mais comum.",
+        path:"Ajustes → seu nome → Senha e Segurança",
+        flag:"Número ou e-mail da pessoa que te monitora aparece ali.",
+        caution:"Se encontrar um número estranho, não apague agora — anote. Remover pode disparar um aviso.",
+        mock:{crumbs:["Conta Apple","Senha e Segurança"],header:"Senha e Segurança",rows:[
+          {label:"Alterar Senha",chev:1},
+          {label:"Autenticação de Dois Fatores",val:"Ativada",chev:1},
+          {label:"Número de Telefone Confiável",sub:"+55 61 9****-**07",target:true,taphint:"É o seu número?",chev:1},
+          {label:"Contato de Recuperação",chev:1}
+        ]}},
+      { title:"Quem vê onde você está?",
+        what:"Sua localização pode estar sendo compartilhada o tempo todo, sem app espião nenhum.",
+        path:"App Buscar → aba Pessoas",
+        flag:"Seu nome compartilhando localização com alguém que você não escolheu.",
+        caution:"Só observe. Desligar de repente pode avisar a pessoa.",
+        mock:{crumbs:["Buscar","Pessoas"],header:"Pessoas",rows:[
+          {ic:"👤",bg:C.grey,label:"Você compartilha com R.",sub:"Sua localização está visível",target:true,taphint:"Você autorizou?",chev:1}
+        ]}},
+      { title:"Há um rastreador escondido te seguindo?",
+        what:"Uma etiqueta Bluetooth (como um AirTag) escondida na bolsa, no carro ou no casaco pode enviar sua localização. O iPhone lista itens desconhecidos que se movem com você.",
+        path:"App Buscar → aba Itens",
+        flag:"Um alerta de item desconhecido se movendo com você, ou um item que não é seu.",
+        caution:"Não descarte o rastreador sozinha — pode ser prova, e removê-lo pode avisar a pessoa. Se sentir perigo, procure ajuda.",
+        mock:{crumbs:["Buscar","Itens"],header:"Itens",rows:[
+          {ic:"🔖",bg:C.grey,label:"Nenhum item seu",sub:"Você não tem AirTags"},
+          {ic:"📡",bg:C.red,label:"Item Desconhecido",sub:"Encontrado se movendo com você",target:true,taphint:"É seu?",chev:1}
+        ]}},
+      { title:"Alguém controla seu aparelho como “família”?",
+        what:"Se você é membro do Compartilhamento Familiar de outra pessoa, ou se o Tempo de Uso tem um código que não é seu, essa pessoa pode ver sua localização e às vezes limitar o aparelho.",
+        path:"Ajustes → seu nome → Compartilhamento Familiar",
+        flag:"Você aparece como membro de um grupo organizado por outra pessoa, ou o Tempo de Uso pede um código que não é seu.",
+        caution:"Sair do grupo pode alertar a pessoa. Só observe por enquanto.",
+        mock:{crumbs:["Conta Apple","Compartilhamento Familiar"],header:"Compart. Familiar",rows:[
+          {ic:"👤",bg:C.grey,label:"R. — Organizador",sub:"Vê localização e compras",target:true,taphint:"É você?",chev:1},
+          {ic:"👤",bg:C.grey,label:"Você",sub:"Membro"}
+        ]}},
+      { title:"Existe um “perfil” controlando o aparelho?",
+        what:"Perfis de configuração dão controle profundo e discreto — normal em celular de empresa, suspeito em celular pessoal.",
+        path:"Ajustes → Geral → VPN e Gerenciamento de Dispositivos",
+        flag:"Um perfil instalado que você não colocou, num aparelho que é só seu.",
+        caution:"Não remova por conta própria — pode ser prova importante.",
+        mock:{crumbs:["Geral","VPN e Gerenciamento de Dispositivos"],header:"Gerenciamento",rows:[
+          {label:"VPN",val:"Não Conectada",chev:1},
+          {ic:"⚙️",bg:C.red,label:"Perfil de Configuração",sub:"Instalado por outro app",target:true,taphint:"Você instalou?",chev:1}
+        ]}},
+      { title:"Quais apps ouvem ou veem você?",
+        what:"Um app com o microfone ou a câmera sempre liberados pode escutar ou observar. Vale conferir quais apps têm esse acesso.",
+        path:"Ajustes → Privacidade e Segurança → Microfone (e Câmera)",
+        flag:"Um app que não precisa de microfone ou câmera com o acesso ligado.",
+        caution:"Se for um app suspeito, anote antes de desligar.",
+        mock:{crumbs:["Privacidade e Segurança","Microfone"],header:"Microfone",rows:[
+          {ic:"💬",bg:C.green,label:"WhatsApp",sw:"on"},
+          {ic:"🔦",bg:C.red,label:"Lanterna",sub:"Por que precisa do microfone?",sw:"on",target:true,taphint:"Faz sentido?"}
+        ]}},
+      { title:"Suas redes sociais estão vinculadas?",
+        what:"WhatsApp, Instagram e Facebook podem estar abertos em outro aparelho ou ligados entre si.",
+        path:"WhatsApp → Configurações → Aparelhos conectados",
+        flag:"Uma sessão ou aparelho conectado que não é seu.",
+        caution:"Se vir um aparelho estranho, anote antes de desconectar.",
+        mock:{crumbs:["WhatsApp","Aparelhos conectados"],header:"Aparelhos conectados",rows:[
+          {ic:"💻",bg:C.red,label:"Windows",sub:"Ativo há 2 dias",target:true,taphint:"É você?",chev:1},
+          {ic:"🖥️",bg:C.grey,label:"WhatsApp Web (Chrome)",sub:"Ativo hoje"}
+        ]}},
+      { title:"Suas chamadas estão sendo desviadas?",
+        what:"É possível redirecionar ligações para outro número sem você perceber.",
+        path:"Ajustes → Telefone → Encaminhamento de Chamadas",
+        flag:"Encaminhamento ligado para um número que não é seu.",
+        caution:"Não desative ainda — registre primeiro.",
+        mock:{crumbs:["Telefone","Encaminhamento de Chamadas"],header:"Encaminhamento",rows:[
+          {label:"Encaminhamento de Chamadas",sw:"on",target:true,taphint:"Está ligado?"},
+          {label:"Encaminhar Para",val:"+55 61 9****",chev:1}
+        ]}},
+      { title:"Seus e-mails estão sendo copiados?",
+        what:"Uma regra escondida pode encaminhar todos os seus e-mails para outra conta, ou apagá-los antes de você ver. É invisível no dia a dia.",
+        path:"No seu e-mail (ex.: Gmail no navegador) → Configurações → Encaminhamento e Filtros",
+        flag:"Um encaminhamento ativo para um endereço que não é seu, ou um filtro que repassa/apaga mensagens.",
+        caution:"Não apague a regra ainda — é uma prova forte. Registre primeiro.",
+        mock:{crumbs:["Gmail","Encaminhamento e POP/IMAP"],header:"Encaminhamento",rows:[
+          {ic:"📧",bg:C.red,label:"Encaminhar uma cópia para",sub:"outro.email@gmail.com",sw:"on",target:true,taphint:"Você criou isso?"},
+          {ic:"🗂️",bg:C.grey,label:"Filtros",val:"2 ativos",chev:1}
+        ]}},
+      { title:"Para onde vai o seu backup?",
+        what:"Se o backup do iPhone está ligado, uma cópia de tudo vai para a Conta Apple conectada (a que você viu no passo 1). Se a conta não for sua, a pessoa tem essa cópia.",
+        path:"Ajustes → seu nome → iCloud → Backup do iCloud",
+        flag:"Backup ligado enquanto a conta conectada não é a sua.",
+        mock:{crumbs:["iCloud","Backup do iCloud"],header:"Backup do iCloud",rows:[
+          {label:"Fazer Backup deste iPhone",sw:"on",target:true,taphint:"Está ligado?"},
+          {label:"Fazer Backup Agora",chev:1},
+          {label:"Último backup",val:"Hoje, 03:14"}
+        ]}},
+      { title:"Teclados e certificados estranhos",
+        what:"Um teclado com “Acesso Total” pode registrar o que você digita. Um certificado extra pode permitir ler seu tráfego (em Ajustes → Geral → Sobre → Certificados Confiáveis).",
+        path:"Ajustes → Geral → Teclado → Teclados",
+        flag:"Teclado de outro app que você não usa, ou certificado que você não instalou.",
+        caution:"Não apague sem orientação — pode ser prova.",
+        mock:{crumbs:["Geral","Teclado","Teclados"],header:"Teclados",rows:[
+          {label:"Português (Brasil)"},
+          {label:"Emoji"},
+          {label:"Teclado de outro app",sub:"Acesso Total: Sim",target:true,taphint:"Você instalou?",chev:1}
+        ]}}
+    ],
+    android: [
+      { title:"De quem é a conta deste Android?",
+        what:"O Android é ligado a uma conta Google. Se não for a sua, outra pessoa pode ver seus dados, localização e backups.",
+        path:"Configurações → Contas (na Samsung: Contas e backup → Gerenciar contas)",
+        flag:"Uma conta Google que não é sua, ou que quem te controla conhece.",
+        mock:{crumbs:["Configurações","Contas"],header:"Contas",rows:[
+          {ic:"G",bg:C.blue,label:"ana.souza@gmail.com",sub:"Google",target:true,taphint:"É a sua conta?",chev:1},
+          {ic:"➕",bg:C.grey,label:"Adicionar conta",chev:1}
+        ]}},
+      { title:"Quais aparelhos estão ligados à sua conta?",
+        what:"Sua conta Google pode estar aberta em outros aparelhos, que acessam seus dados.",
+        path:"Configurações → Google → Gerenciar sua Conta do Google → Segurança → Seus dispositivos",
+        flag:"Um aparelho na lista que você não reconhece.",
+        mock:{crumbs:["Segurança","Seus dispositivos"],header:"Seus dispositivos",rows:[
+          {ic:"📱",bg:C.grey,label:"Pixel 8 (este)",sub:"Sessão atual",chev:1},
+          {ic:"📱",bg:C.red,label:"Aparelho desconhecido",sub:"Outra cidade · há 2 dias",target:true,taphint:"É você?",chev:1}
+        ]}},
+      { title:"Como sua conta é recuperada?",
+        what:"Quem controla o e-mail ou telefone de recuperação entra na conta mesmo sem a senha. É a porta dos fundos mais comum.",
+        path:"Configurações → Google → Gerenciar conta → Segurança",
+        flag:"E-mail ou número da pessoa que te monitora cadastrado ali.",
+        caution:"Se encontrar algo estranho, anote — não remova agora, pode disparar um aviso.",
+        mock:{crumbs:["Conta Google","Segurança"],header:"Segurança",rows:[
+          {ic:"🛡️",bg:C.green,label:"Verificação em duas etapas",val:"Ativada",chev:1},
+          {ic:"📞",bg:C.orange,label:"Telefone de recuperação",sub:"+55 61 9****-**07",target:true,taphint:"É o seu número?",chev:1},
+          {ic:"✉️",bg:C.grey,label:"E-mail de recuperação",chev:1}
+        ]}},
+      { title:"Quem vê onde você está?",
+        what:"Sua localização pode estar sendo compartilhada continuamente, sem nenhum app espião.",
+        path:"Google Maps → sua foto (canto superior) → Compartilhamento de localização",
+        flag:"Localização compartilhada com alguém que você não escolheu.",
+        caution:"Só observe. Desligar de repente pode avisar a pessoa.",
+        mock:{crumbs:["Maps","Compartilhamento de localização"],header:"Compartilhamento",rows:[
+          {ic:"📍",bg:C.red,label:"Compartilhando com R.",sub:"Em tempo real, sem prazo",target:true,taphint:"Você autorizou?",chev:1}
+        ]}},
+      { title:"Há um rastreador escondido te seguindo?",
+        what:"Uma etiqueta Bluetooth escondida na bolsa, no carro ou no casaco pode enviar sua localização. O Android alerta e permite procurar um rastreador.",
+        path:"Configurações → Segurança e emergência → Alerta de rastreador desconhecido → Verificar agora",
+        flag:"Um aviso de rastreador desconhecido se movendo com você, ou um encontrado na busca.",
+        caution:"Não descarte o rastreador sozinha — pode ser prova, e removê-lo pode avisar a pessoa. Se sentir perigo, procure ajuda.",
+        mock:{crumbs:["Segurança e emergência","Alerta de rastreador"],header:"Alerta de rastreador",rows:[
+          {ic:"🔍",bg:C.blue,label:"Verificar agora",chev:1},
+          {ic:"📡",bg:C.red,label:"Rastreador desconhecido",sub:"Detectado se movendo com você",target:true,taphint:"É seu?",chev:1}
+        ]}},
+      { title:"Alguém controla seu aparelho como “família”?",
+        what:"Se o seu aparelho é supervisionado por outra pessoa pelo Family Link, ela pode ver sua localização, seus apps e seu tempo de tela, e até controlar o aparelho.",
+        path:"Configurações → Google → Controles dos pais (Family Link)",
+        flag:"O aparelho aparece como supervisionado por outra pessoa, sem que isso faça sentido para você.",
+        caution:"Sair da supervisão pode alertar a pessoa. Só observe por enquanto.",
+        mock:{crumbs:["Google","Controles dos pais"],header:"Controles dos pais",rows:[
+          {ic:"👤",bg:C.red,label:"Supervisionado por R.",sub:"Vê localização e apps",target:true,taphint:"Você concordou?",chev:1}
+        ]}},
+      { title:"Algum app tem “controle total”?",
+        what:"Apps de acessibilidade ou de administração podem ler a tela e controlar o aparelho de forma discreta.",
+        path:"Configurações → Acessibilidade → Apps instalados",
+        flag:"Um app ligado ali que você não reconhece ou não precisa.",
+        caution:"Não desative por conta própria — pode ser prova importante.",
+        mock:{crumbs:["Acessibilidade","Apps instalados"],header:"Apps instalados",rows:[
+          {ic:"👁️",bg:C.grey,label:"TalkBack",val:"Desativado",chev:1},
+          {ic:"⚙️",bg:C.red,label:"App desconhecido",sub:"Pode ver e controlar a tela",target:true,taphint:"Você ativou?",chev:1}
+        ]}},
+      { title:"Quais apps ouvem ou veem você?",
+        what:"Um app com o microfone ou a câmera sempre liberados pode escutar ou observar. Vale conferir quais apps têm esse acesso.",
+        path:"Configurações → Segurança e privacidade → Gerenciador de permissões → Microfone",
+        flag:"Um app que não precisa de microfone ou câmera com o acesso ligado.",
+        caution:"Se for um app suspeito, anote antes de desligar.",
+        mock:{crumbs:["Gerenciador de permissões","Microfone"],header:"Microfone",rows:[
+          {ic:"💬",bg:C.green,label:"WhatsApp",sub:"Permitido ao usar o app",chev:1},
+          {ic:"🔦",bg:C.red,label:"Lanterna",sub:"Sempre permitido",target:true,taphint:"Faz sentido?",chev:1}
+        ]}},
+      { title:"Suas redes sociais estão vinculadas?",
+        what:"WhatsApp, Instagram e Facebook podem estar abertos em outro aparelho ou ligados entre si.",
+        path:"WhatsApp → Configurações → Aparelhos conectados",
+        flag:"Uma sessão ou aparelho conectado que não é seu.",
+        caution:"Se vir um aparelho estranho, anote antes de desconectar.",
+        mock:{crumbs:["WhatsApp","Aparelhos conectados"],header:"Aparelhos conectados",rows:[
+          {ic:"💻",bg:C.red,label:"Windows",sub:"Ativo há 2 dias",target:true,taphint:"É você?",chev:1},
+          {ic:"🖥️",bg:C.grey,label:"WhatsApp Web (Chrome)",sub:"Ativo hoje"}
+        ]}},
+      { title:"Suas chamadas estão sendo desviadas?",
+        what:"É possível redirecionar suas ligações para outro número sem você perceber. Você também pode digitar *#21# para conferir.",
+        path:"App Telefone → Configurações → Encaminhamento de chamadas",
+        flag:"Encaminhamento ativo para um número que não é seu.",
+        caution:"Não desative ainda — registre primeiro.",
+        mock:{crumbs:["Telefone","Encaminhamento de chamadas"],header:"Encaminhamento",rows:[
+          {ic:"📞",bg:C.orange,label:"Sempre encaminhar",sw:"on",target:true,taphint:"Está ligado?"},
+          {ic:"➡️",bg:C.grey,label:"Número",val:"+55 61 9****"}
+        ]}},
+      { title:"Seus e-mails estão sendo copiados?",
+        what:"Uma regra escondida pode encaminhar todos os seus e-mails para outra conta, ou apagá-los antes de você ver. É invisível no dia a dia.",
+        path:"No seu e-mail (ex.: Gmail no navegador) → Configurações → Encaminhamento e Filtros",
+        flag:"Um encaminhamento ativo para um endereço que não é seu, ou um filtro que repassa/apaga mensagens.",
+        caution:"Não apague a regra ainda — é uma prova forte. Registre primeiro.",
+        mock:{crumbs:["Gmail","Encaminhamento e POP/IMAP"],header:"Encaminhamento",rows:[
+          {ic:"📧",bg:C.red,label:"Encaminhar uma cópia para",sub:"outro.email@gmail.com",sw:"on",target:true,taphint:"Você criou isso?"},
+          {ic:"🗂️",bg:C.grey,label:"Filtros",val:"2 ativos"}
+        ]}},
+      { title:"Para onde vai o seu backup?",
+        what:"Se o backup do aparelho vai para outra conta, a pessoa tem uma cópia dos seus dados.",
+        path:"Configurações → Google → Backup",
+        flag:"Backup ligado a uma conta que não é a sua.",
+        mock:{crumbs:["Google","Backup"],header:"Backup",rows:[
+          {ic:"☁️",bg:C.blue,label:"Backup pelo Google One",sw:"on"},
+          {ic:"👤",bg:C.red,label:"Conta do backup",sub:"conta.estranha@gmail.com",target:true,taphint:"É a sua conta?",chev:1}
+        ]}},
+      { title:"Certificados e VPN estranhos",
+        what:"Um certificado extra ou uma VPN podem permitir que alguém leia seu tráfego de internet.",
+        path:"Configurações → Segurança e privacidade → Credenciais (e VPN)",
+        flag:"Certificado ou VPN que você não instalou.",
+        caution:"Não apague sem orientação — pode ser prova.",
+        mock:{crumbs:["Segurança e privacidade","Credenciais"],header:"Credenciais do usuário",rows:[
+          {ic:"🔒",bg:C.grey,label:"Certificados do sistema",val:"Normais",chev:1},
+          {ic:"📄",bg:C.red,label:"Certificado do usuário",sub:"Instalado manualmente",target:true,taphint:"Você instalou?",chev:1}
+        ]}}
+    ]
+  };
+
+  const state = { platform:null, i:0, answers:[] };
+
+  function start(p){ state.platform=p; state.i=0; state.answers=new Array(CONTENT[p].length).fill(null); show('steps'); render(); }
+
+  function show(id){ document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); document.getElementById(id).classList.add('active'); window.scrollTo(0,0); }
+
+  function esc(s){ return (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+  function buildPhone(m, platform){
+    const cls = platform==='ios' ? 'ios' : 'android';
+    const crumbs = m.crumbs.map((c,idx)=>{
+      const dest = idx===m.crumbs.length-1;
+      return `<span class="crumb${dest?' dest':''}">${esc(c)}</span>` + (dest?'':'<span class="csep">›</span>');
+    }).join('');
+
+    const rows = m.rows.map(r=>{
+      const ic = (r.ic||r.bg) ? `<span class="r-ic" style="background:${r.bg||'#8A9591'}" aria-hidden="true">${r.ic||''}</span>` : `<span style="width:2px;flex:none"></span>`;
+      const sub = r.sub?`<div class="r-sub">${esc(r.sub)}</div>`:'';
+      const tx = `<div class="r-tx"><div class="r-lb">${esc(r.label)}</div>${sub}</div>`;
+      let right = '';
+      if(r.sw){ right = `<span class="sw" aria-hidden="true"></span>`; }
+      else if(r.val){ right = `<span class="r-val">${esc(r.val)}</span><span class="chev">›</span>`; }
+      else if(r.chev){ right = `<span class="chev">›</span>`; }
+      const tap = r.target?`<span class="taphere">👆 ${esc(r.taphint||'Toque aqui')}</span>`:'';
+      return `<div class="row${r.target?' target':''}">${tap}${ic}${tx}${right}</div>`;
+    }).join('');
+
+    return `
+      <div class="crumbs" aria-hidden="true">${crumbs}</div>
+      <div class="phone-wrap">
+        <div class="phone">
+          <div class="scrn ${cls}">
+            <div class="statusbar" aria-hidden="true">
+              <span>09:41</span>
+              <span class="sb-r"><span class="sb-dot"></span><span class="sb-bat"></span></span>
+            </div>
+            <div class="nav" aria-hidden="true"><span class="nav-back">‹</span><span class="nav-title">${esc(m.header)}</span></div>
+            <div class="list">${platform==='ios'?`<div class="group">${rows}</div>`:rows}</div>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  function render(){
+    const steps = CONTENT[state.platform];
+    const s = steps[state.i];
+    const n = steps.length;
+
+    document.getElementById('progLabel').textContent = `Passo ${state.i+1}`;
+    document.getElementById('progTotal').textContent = `${state.i+1} de ${n}`;
+    document.getElementById('progFill').style.width = `${((state.i+1)/n)*100}%`;
+
+    const tgt = (s.mock.rows.find(r=>r.target)||{}).label || '';
+    const phone = buildPhone(s.mock, state.platform);
+    const note = state.platform==='android' ? 'Baseado no Android atual — em Samsung/Xiaomi alguns nomes mudam.' : 'Baseado no iOS atual — pode variar um pouco conforme a versão.';
+    const cautionHTML = s.caution?`<div class="caution"><div class="lbl">⚠️ Só observe por enquanto</div>${s.caution}</div>`:'';
+
+    const opts=['Sim','Não','Não sei'];
+    const optsHTML = opts.map((o,idx)=>{const sel=state.answers[state.i]===idx?' sel':''; return `<button class="opt${sel}" onclick="answer(${idx})">${o}</button>`;}).join('');
+
+    document.getElementById('stepCard').innerHTML = `
+      <span class="tag safe">✓ Seguro só olhar</span>
+      <h3>${s.title}</h3>
+      <div class="field"><div class="lbl">O que é isto</div><p>${s.what}</p></div>
+      <div class="field"><div class="lbl">Siga este caminho</div>
+        <div role="img" aria-label="Tela de exemplo: ${esc(s.mock.header)}. Toque em ${esc(tgt)}.">${phone}</div>
+        <div class="mock-cap">Toque em <b>${esc(tgt)}</b></div>
+        <div class="mock-note">${note}</div>
+      </div>
+      <div class="flag"><div class="lbl">🚩 Sinal de alerta</div>${s.flag}</div>
+      ${cautionHTML}
+      <div class="report"><p>Você encontrou algo assim?</p><div class="opts">${optsHTML}</div></div>`;
+
+    document.getElementById('backBtn').style.visibility = state.i===0?'hidden':'visible';
+    document.getElementById('nextBtn').textContent = state.i===n-1?'Ver o que fazer':'Próximo';
+    window.scrollTo(0,0);
+  }
+
+  function answer(idx){ state.answers[state.i]=idx; render(); }
+  function next(){ const n=CONTENT[state.platform].length; if(state.i<n-1){state.i++;render();} else buildSummary(); }
+  function prev(){ if(state.i>0){state.i--;render();} }
+
+  function buildSummary(){
+    const steps=CONTENT[state.platform]; const flagged=[];
+    state.answers.forEach((a,idx)=>{ if(a===0) flagged.push(steps[idx].title); });
+    const list=document.getElementById('sumList');
+    if(flagged.length===0){
+      list.innerHTML=`<div class="sum-item none">Você não marcou nenhum sinal de alerta. Isso é um bom sinal — mas não é garantia. Se ainda sentir que algo está errado, confie no seu instinto e procure orientação.</div>`;
+    } else {
+      list.innerHTML=`<div class="sum-item"><b>Você marcou ${flagged.length} ponto(s) de atenção:</b></div>`+flagged.map(t=>`<div class="sum-item">${esc(t)}</div>`).join('');
+    }
+    show('summary');
+  }
+
+  document.addEventListener('keydown', e=>{ if(e.key==='Escape') quickExit(); });
+</script>
+</body>
+</html>
